@@ -1,0 +1,87 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+
+\author{Itzel Muñoz, Victor Martínez, Alfonso Kim}
+\date{\today}
+\title{Anteproyecto Estadística Computacional}
+
+\begin{document}
+\maketitle
+
+	\section{Objetivo}
+		Mostrar la existencia de una dependencia entre el estado de ánimo de los habitantes de la Ciudad de México y el lugar donde se encuentran dentro de ella a partir de información pública geolocalizada (\emph{Twitter}).
+
+		Nuestro trabajo buscará definir una medida colectiva del humor (positivo o negativo) para los usuarios de \emph{Twitter} en la Ciudad de México. Planteamos como hipótesis de trabajo que es posible detectar zonas dentro de la ciudad con una medida mayormente positiva (e.g. lugares turísticos, museos, centros comerciales, etc) y lugares donde el sentimiento sea mayormente negativo (e.g. centros de sanciones, delegaciones, entre otros). 
+
+
+	\section{Contexto Teórico}
+		El mundo en el que vivimos actualmente es un mundo globalizado en el cual el uso de las redes sociales crece majestuosamente. Gracias a que hoy en día las noticias se dan a conocer inmediatamente, el público puede responder a éstas al instante mediante estas redes. Las repercusiones de lo que se expresa en ellas y su alcance son impresionantes. Es por esto que se ha vuelto de gran interés el análisis de la información que se puede extraer de las redes sociales.
+
+		\emph{Twitter}, una red social con más de 500 millones de usuarios a nivel mundial, permite la transmisión de mensajes de texto cortos (menos de 140 caracteres), llamados \emph{tweets}, de manera pública o a un grupo selecto de usuarios o seguidores. En esta red es posible proporcionar tu ubicación, y dadas sus características, el contenido de los \emph{tweets} suelen ser opiniones y/o sentimientos que los usuarios piensan y/o sienten en ese preciso momento. Por ello es natural el pensar en una relación entre el estado de ánimo de las personas y su localización dentro de la ciudad. De hecho, muchos estudios se han centrado en analizar el contenido de estos mensajes para inferir los estados de ánimo dentro de una población, obteniendo resultados similares a los de los encuestadores \cite{Oconnor, Bollen}.
+
+		El pensar en una relación "humor-espacial" \ es algo natural pues no se experimentan las mismas emociones en un estadio de futból, en un hospital o en un centro nocturno. Las razones por las que una persona se encuentra en cierto lugar pueden ser tan fuertes que influyen en su estado de ánimo, o bien, el entorno que rodea a la persona tiene la posibilidad de afectar su humor, esto se ve reflejado en aquello que expresa vía \emph{Twitter}. Ambos casos muestran que los sentimientos pueden estar relacionados con la ubicación de los individuos.
+		
+		De aquí surge la motivación para el tema de nuestro proyecto.
+		
+	\section{Datos}
+		Usamos el API (Interfaz de Programación de Aplicaciones, por sus siglas en inglés) para extraer los \emph{tweets} que son generados dentro del Distrito Federal y área conurbada, en el rectángulo definido por las coordenadas $19.11,-99.36$ y $19.57,-98.97$.
+		
+        Dicha extracción se realiza por un proceso en un servidor en Amazon EC2 que está conectado al API de \emph{Twitter} las 24 horas del día. El proceso está desarrollado en Python usando la librería Tweepy \cite{tweepy}. Dada la gran cantidad de \emph{tweets} que estamos recopilando fue necesario usar un sistema manejador de bases de datos, decidimos usar Postgres.
+
+		Al día 3 de noviembre del 2013 contamos con más de $5,287,000$ extraidos desde el 18 de junio hasta el 14 de agosto, y desde el 16 de septiembre en adelante, actualmente seguimos extrayendo \emph{tweets} con un promedio de $49,000$ \emph{tweets} diarios. Todos estos contienen la información geográfica (latitud, longitud) de dónde fueron generados.
+
+		Es importante notar que, por las condiciones socio-políticas de la Ciudad de México, nuestros datos representan una muestra sesgada de la población, es decir, se captura con mayor probabilidad datos de los estratos de clases sociales alta y media-alta. 
+
+	\section{Método}
+	    Siguiendo el proceso de etiquetación automática propuesto por Go, Bhayani y Huang \cite{Go} separamos los \emph{tweets} ``felices''  y ``tristes'' (positivos y negativos, respectivamente) usando cadenas de caracteres que denotan dichas emociones (\emph{emoticons}).
+	    
+	    \noindent Para denotar felicidad usamos \emph{tweets} que contienen:
+	\begin{multicols}{3}
+	\begin{itemize}
+        \item :)
+        \item (:
+        \item =) 
+        \item (=
+        \item :-)
+        \item (-:
+        \item :P
+        \item :p
+        \item :D
+        \item =D
+        \item jaja
+    \end{itemize}
+    \end{multicols}
+    
+
+        \noindent Para encontrar los \emph{tweets} que denotan tristeza utilizamos:
+    \begin{multicols}{3}
+	\begin{itemize}
+        \item :(
+        \item ):
+        \item =( 
+        \item )=
+        \item ;(
+        \item :-(
+        \item )-:
+    \end{itemize}
+    \end{multicols}
+    
+    Una vez separados los tweets se realizará un análisis espacial para aceptar o rechazar la hipótesis sobre la influencia de la ubicación de una persona en su estado de ánimo.
+
+
+    \begin{thebibliography}{9}
+    \bibitem{Bollen}
+    Bollen, J., Mao, H., Pepe, A.: \emph{Modeling public mood and emotion: Twitter sentiment and socio-economic phenomena}. In: ICWSM. (2011)
+    \bibitem{Oconnor}
+    O’Connor, B., Balasubramanyan, R., Routledge, B.R., Smith, N.A.: \emph{From tweets to polls: Linking text sentiment to public opinion time series}. ICWSM 11 (2010) 122–129
+    \bibitem{Go}
+    Go, A., Bhayani, R., Huang, L.: Twitter sentiment classification using distant supervision. CS224N Project Report, Stanford (2009) 1–12
+    \bibitem{tweepy}
+        https://github.com/tweepy/tweepy
+    \end{thebibliography}
+
+\end{document}
+
+
