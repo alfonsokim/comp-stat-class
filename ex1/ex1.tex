@@ -1,0 +1,80 @@
+\title{Examen Parcial - Estadística Computacional}
+\author{
+        Alfonso Kim - 
+}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\usepackage{mathtools}
+
+\begin{document}
+\maketitle
+
+\section{Probabilidad}
+\subsection*{Jugador de Dados}
+Sea x la suma de la cara hacia arriba de los 2 dados
+
+\begin{equation*}
+  x = 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+\end{equation*}
+
+Y la las probabilidades de cada suma:
+\begin{equation*}
+  P(x) = \cfrac{1}{36}, \cfrac{2}{36}, \cfrac{3}{36}, \cfrac{4}{36}, \cfrac{5}{36}, \cfrac{6}{36}, \cfrac{6}{36}, \cfrac{5}{36}, \cfrac{4}{36}, \cfrac{3}{36}, \cfrac{2}{36}, \cfrac{1}{36} 
+\end{equation*}
+
+La probabilidad de ganar el juego
+\begin{equation}
+  P(ganar) = P(ganar\ 1\ tiro) \cup P(ganar\ por\ comodines)
+\end{equation}
+
+La probabilidad de ganar en el primer tiro
+\begin{equation*}
+  P(ganar\ 1\ tiro) = P(x=7) \cup P(x=11) = \cfrac{2}{9}
+\end{equation*}
+
+La probabilidad de obtener un comodín
+\begin{equation*}
+  P(comodin) = P(x=4) \cup P(x=5) \cup P(x=6) \cup P(x=8) \cup P(x=8) \cup P(x=9) = \cfrac{2}{3}
+\end{equation*}
+
+La probabilidad de ganar por comodines
+\begin{equation*}
+  P(ganar\ por\ comodines) = P(comodin) \cap P(salgan\ comodines\ antes\ del\ 7)
+\end{equation*}
+
+\begin{equation*}
+  P(salgan\ comodines\ antes\ del\ 7) = \cfrac{2}{3} \ \sum_{k=1}^{\infty} \Big(\cfrac{1}{6}\Big)^{k-1} = \cfrac{5}{9}
+\end{equation*}
+
+\begin{equation*}
+  P(ganar\ por\ comodines) = \cfrac{2}{3} \times \cfrac{5}{9} = \cfrac{7}{9}
+\end{equation*}
+
+Sustituyendo en 1:
+
+\begin{equation*}
+  P(ganar) = \cfrac{2}{9} \times \cfrac{5}{9} =\cfrac{7}{9}
+\end{equation*}
+
+
+
+
+
+\paragraph{Outline}
+The remainder of this article is organized as follows.
+Section~\ref{previous work} gives account of previous work.
+Our new and exciting results are described in Section~\ref{results}.
+Finally, Section~\ref{conclusions} gives the conclusions.
+
+\section{Previous work}\label{previous work}
+A much longer \LaTeXe{} example was written by Gil~\cite{Gil:02}.
+
+\section{Results}\label{results}
+In this section we describe the results.
+
+\section{Conclusions}\label{conclusions}
+We worked hard, and achieved very little.
+
+\end{document}

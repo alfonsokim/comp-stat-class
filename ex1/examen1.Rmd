@@ -1,0 +1,155 @@
+Examen Parcial - Estadística Computacional
+========================================================
+
+Alfonso Kim - 145849
+--------------------------------------------------------
+
+### 1. Probabilidad
+
+#### a. Dados
+
+Sea x la suma de la cara hacia arriba de los 2 dados
+$x = 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12$
+
+Con probabilidades de aparacer de $P(x) = 0, \cfrac{1}{36}, \cfrac{2}{36}, \cfrac{3}{36}, \cfrac{4}{36}, \cfrac{5}{36}, \cfrac{6}{36}, \cfrac{5}{36}, \cfrac{4}{36}, \cfrac{3}{36}, \cfrac{2}{36}, \cfrac{1}{36}$
+
+La probabilidad de ganar el juego es:
+$P(ganar) = P(ganar\ 1\ tiro) \cup P(ganar\ por\ comodines)$
+
+Con probabilidad de ganar el primer tiro:
+$P(ganar\ 1\ tiro) = P(x=7) \cup P(x=11)$
+
+La probabilidad de sacar un comodín:
+$P(comodin) = P(x=4) \cup P(x=5) \cup P(x=6) \cup P(x=8) \cup P(x=9) \cup P(x=10)$
+
+La probabilidad de ganar por comodines:
+$P(ganar\ por\ comodines) = P(comodin) \cap P(salgan\ comodines\ antes\ del\ 7)$
+
+$P(ganar) = 0.4929293$
+
+#### b. Distribución de Laplace
+
+Valor esperado
+```{r echo=FALSE}
+lambda <- 1/2
+m <- 0
+
+f.laplace <- function(x){
+    lambda / 2 * exp( -lambda * abs(x - m))
+} 
+
+e.laplace <- function(x){
+    x * f.laplace(x)
+}
+
+E.Laplace <- integrate(e.laplace, -Inf, Inf)
+
+e.laplace.2 <- function(x){
+    x^2 * f.laplace(x) }
+
+E.Laplace.2 <- integrate(e.laplace.2, -Inf, Inf)
+
+varianza <- E.Laplace.2$value - E.Laplace$value^2  #2/lambda^2
+```
+
+```{r}
+E.Laplace$value
+varianza
+```
+
+#### b.1. Variables aleatorias
+
+```{r echo=FALSE}
+set.seed(10102013)
+x1 <- rexp(25000, rate=1/2)
+x2 <- rexp(25000, rate=1/2)
+y <- x1 - x2
+
+laplace <- function(x){
+    l <- 1/2
+    (1/2) * (exp(-(abs(x-l))))
+}
+
+hist(y, prob=TRUE)
+curve(laplace, add=TRUE, lwd=2, col="red")
+```
+
+
+### 2. Analisis Exploratorio de Datos
+
+```{r echo=FALSE}
+crea.tabla.tuplas <- function(string, k=3) {
+    s.vector <- strsplit(string, '')[[1]] 
+    tuplas <- c()
+    for (i in 1:( nchar(string) - k+1 ) ) {
+        tupla <- paste(s.vector[i : (i+k-1)], collapse="")
+        tuplas <- c(tuplas, tupla)
+    }
+    table(tuplas)
+}
+```
+
+#### a.
+```{r}
+print(crea.tabla.tuplas("CAGACAAAAC"))
+```
+
+
+```{r echo=FALSE}
+crea.cadena.pruebas <- function(num.caracteres, universo="ACGT"){
+    elementos <- strsplit(universo, "")[[1]]
+    paste(sample(elementos, num.caracteres, replace=TRUE), collapse="")
+}
+```
+
+#### b.
+```{r}
+cadena.prueba <- crea.cadena.pruebas(10000)
+print(crea.tabla.tuplas(cadena.prueba))
+```
+
+#### d.
+```{r echo=FALSE}
+cv <- function(observaciones){
+    sd(observaciones) / mean(observaciones)
+}
+
+num.observaciones <- 20
+media.observaciones <- 2
+
+coeficientes <- c()
+for (i in 1:500){
+    muestra <- rexp(num.observaciones, 1/media.observaciones)
+    coeficientes <- c(coeficientes, cv(muestra))
+}
+
+hist(coeficientes)
+```
+
+
+### 3. Funciones
+
+```{r echo=FALSE}
+f <- function(x){
+    ret <- 0
+    if(x < 0){
+        ret <- x^2 + 2*x + 3
+    } else if (x >= 0 && x < 2){
+        ret <- x + 3
+    } else {
+        ret <- x^2 + 4*x - 7
+    }
+    ret
+}
+
+fvec <- function(xvec){
+    yvec <- c()
+    for(x in xvec){
+        yvec <- c(yvec, f(x))
+    }
+    yvec
+}
+
+curve(fvec, from=-3, to=3)
+```
+

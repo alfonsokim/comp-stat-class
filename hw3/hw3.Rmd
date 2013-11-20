@@ -1,0 +1,196 @@
+Tarea 3 - Estadística Computacional
+========================================================
+
+Itzel Muñoz - Alfonso Kim
+--------------------------------------------------------
+```{r echo=FALSE}
+options(digits=5)
+```
+```{r}
+set.seed(145849)
+```
+
+
+## Ejercicio 1
+
+```{r}
+muestraX <- rnorm(100,100,10)
+mediasX <- mean(muestraX)
+for (i in 1:999){
+  muestraX <- rnorm(100, 100, 10)
+  mediasX <- c(mediasX, mean(muestraX))
+}
+
+muestraY <- rnorm(81, 50, 9)
+mediasY <- mean(muestraY)
+for (i in 1:999){
+  muestraY <- rnorm(81, 50, 9)
+  mediasY <- c(mediasY, mean(muestraY))
+}
+```
+
+
+### b)
+```{r fig.width=7, fig.height=6}
+resta <- mediasX - mediasY
+hist(resta,probability=TRUE)
+lines(density(rnorm(1000,50,sqrt(2))),
+      col="red", lwd=2)
+```
+
+### c)
+```{r}
+mu <- mean(resta)
+mu
+
+sigma <- sd(resta)
+sigma
+```
+
+### d)
+```{r}
+p.empirica <- pnorm(52,mu,sigma)
+p.teorica <- pnorm(52,50,sqrt(2))
+
+p.empirica
+p.teorica
+```
+
+
+## Ejercicio 2
+### a), b) y c)
+
+```{r fig.width=8, fig.height=8}
+lambda <- 1
+x <- c(seq(0.01, 2, 0.05))
+
+par(mfrow=c(2,2))
+for(n in c(30, 100, 300, 500)){
+    plot(x,dgamma(x,n,n*lambda),type="l",lty=1,
+         main=paste("Distribución Gamma para n =", n))    
+}
+
+for(n in c(30, 100, 300, 500)){
+    mediaExp <- array(0,n)
+    for (i in 1:n) {mediaExp[i]<-mean(rexp(n,1))}
+    hist(mediaExp, probability=TRUE, 
+         main=paste("Medias de dist. exponencial con n =", n))
+    lines(density(rgamma(x,n,lambda*n)), 
+          col="blue", lwd=2)
+}
+```
+```{r echo=FALSE}
+par(mfrow=c(1,1))
+```
+
+### d)
+A partir de una muestra de 300 se puede decir que coinciden
+la distribución de muestreo y la función de densidad
+
+
+
+## Ejercicio 3
+
+### a)
+```{r}
+binom.a <- rbinom(size=1000, n=20000, p=0.3)
+binom.b <- rbinom(size=1000, n=20000, p=0.7)
+```
+
+Aproximacion a una distribucion normal:
+```{r fig.width=7, fig.height=6}
+u <- (1000 * 0.7) - (1000 * 0.3)
+s <- sqrt((1000 * 0.7) * (1 - 0.7)) + sqrt((1000 * 0.3) * (1 - 0.3))
+
+norm <- rnorm(n=20000, mean=u, sd=s)
+hist(binom.b - binom.a, probability=TRUE)
+lines(density(norm), col="red", lwd=2)
+```
+
+
+
+## Ejercicio 4
+
+### a)
+```{r}
+mediaPoi <- array(0,100)
+for (i in 1:100){ mediaPoi[i] <- mean(rpois(1000,i)) }
+mediaPoi
+```
+
+Las medias son valores cercanos a la lambda correspondiente
+```{r}
+lambda <- 1
+mediaPoi <- array(0,100)
+for (i in 1:100){ mediaPoi[i] <- mean(rpois(1000,lambda)) }
+mediaPoi
+```
+
+Las medias son valores cercanos a 1
+```{r}
+mean(mediaPoi)
+```
+
+
+
+## Ejercicio 5
+
+### a)
+```{r}
+x.0 <- function(p){ p ^ 3 }
+x.1 <- function(p){ (1 - p) * (p ^ 2) }
+x.2 <- function(p){ (1 - p) ^ 2 }
+x.3 <- function(p){ (1 - p) * p * 2 }
+
+f.x <- function(x){
+    if(! x %in% 0:3){
+        stop("x invalida")
+    }
+    c(x.0, x.1, x.2, x.3)[[x+1]]
+}
+
+valores <- apply(as.matrix(0:3), 1, function(x){
+            integrate(f.x(x), 0, 1)$value
+})
+
+sum(valores)
+```
+
+
+### b)
+```{r}
+x0 <- 24
+x1<- 54
+x2 <- 32
+x3 <- 40
+
+p.gorro <- (3*x0 + 2*x1 + x3)/(3*x0 + 3*x1 + 2*x2 + 2*x3)
+p.gorro
+```
+
+```{r}
+f.p <- function(p) {
+    ( 72 * log(p) ) + ( 54 * log(1 - p) ) + ( 108 * log(p) ) +
+    ( 64 * log(1 - p) ) + ( 40 * log(p) ) + ( 40 * log(1 - p) ) + 
+    ( 40 * log(2) ) + 
+    log( factorial(150) / (factorial(24) * factorial(54) * factorial(32) * factorial(40)) )    
+}
+```
+
+
+### c)
+```{r}
+max <- optim(runif(1), f.p, method="Brent", 
+             control=list(fnscale=-1), lower=0, upper=1)
+
+max$par; max$value
+```
+El máximo optimizado es igual al calculado
+
+### d)
+```{r fig.width=7, fig.height=6}
+curve(f.p, from=0, to=1, col="blue", main="Log-Verosimilitud")
+points(x=max$par, y=max$value, lwd=2, bg="grey")
+```
+
+
