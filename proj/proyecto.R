@@ -3,6 +3,7 @@
 ## Ejemplo: http://pages.stern.nyu.edu/~achinco/programming_examples/Example__PlotGeographicDensity.html
 ## RgoogleMaps: http://cran.r-project.org/web/packages/RgoogleMaps/index.html
 
+---
 
 library(ggmap)
 library(ggplot2)
