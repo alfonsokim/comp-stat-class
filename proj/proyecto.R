@@ -10,8 +10,17 @@ g.map <- get_map(location = c(lon = -99.1393, lat = 19.3772),
               zoom = 11, maptype = 'roadmap')
 map <- ggmap(g.map)
 
-coordinates <- read.csv(file="100coords.txt", header=F)
-names(coordinates) <- c("x", "y")
-coordinates
+happy.coordinates <- read.csv(file="coord_felices.txt", header=F)
+names(happy.coordinates) <- c("x", "y")
+head(happy.coordinates)
 
-map + geom_point(data = coordinates, aes(x = x, y = y), colour = "red", size = 2)
+map + geom_point(data = happy.coordinates, 
+                 aes(x = x, y = y), colour = "blue", size = 1)
+
+
+sad.coordinates <- read.csv(file="coord_tristes.txt", header=F)
+names(sad.coordinates) <- c("x", "y")
+head(sad.coordinates)
+
+map + geom_point(data = sad.coordinates, 
+                 aes(x = x, y = y), colour = "red", size = 1)
