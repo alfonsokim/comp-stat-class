@@ -1,4 +1,6 @@
 *.jpeg
+*.tron
+*.ser
 *.rda
 *.html
 *.md

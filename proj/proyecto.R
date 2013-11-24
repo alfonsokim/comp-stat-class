@@ -6,9 +6,12 @@
 library(ggmap)
 library(ggplot2)
 
+## Bajar el mapa
 g.map <- get_map(location = c(lon = -99.1393, lat = 19.3772), 
               zoom = 11, maptype = 'roadmap')
 map <- ggmap(g.map)
+
+setwd("~/r-workspace/comp-stats/proj")
 
 happy.coordinates <- read.csv(file="coord_felices.txt", header=F)
 names(happy.coordinates) <- c("x", "y")
@@ -20,7 +23,9 @@ head(sad.coordinates)
 
 
 #Dibuja todos los tweets
-#coord_map <- map + geom_point(data = happy.coordinates, aes(x = x, y = y), colour = "green", size = 2) + geom_point(data = sad.coordinates, aes(x=x, y = y), colour="red", size=2)
+#coord_map <- map + 
+#    geom_point(data = happy.coordinates, aes(x = x, y = y), colour = "green", size = 2) + 
+#    geom_point(data = sad.coordinates, aes(x=x, y = y), colour="red", size=2)
 #coord_map
 
 #########################
@@ -30,8 +35,14 @@ sample.size <- .05
 n.sad <- dim(sad.coordinates)[1]
 n.happy <- dim(happy.coordinates)[1]
 
-sad.sample <- data.frame(sad.coordinates[sample(1:n.sad, size = n.sad * sample.size), ], type=as.factor(0))
-happy.sample <- data.frame(happy.coordinates[sample(1:n.happy, size = n.happy * sample.size), ], type=as.factor(1))
+sad.sample <- data.frame(
+    sad.coordinates[sample(1:n.sad, size = n.sad * sample.size), ], 
+    type=as.factor(0))
+
+happy.sample <- data.frame(
+    happy.coordinates[sample(1:n.happy, size = n.happy * sample.size), ], 
+    type=as.factor(1))
+
 sample <- data.frame(rbind(happy.sample, sad.sample))
 
 map + geom_point(data = sample, aes(x = x, y = y, colour = type))
@@ -56,7 +67,8 @@ bounds <- build.lattice(.009, .009,
                         xmin = -99.3, xmax = -99.0, 
                         ymin = 19.25, ymax = 19.58)
 
-map + geom_point(data = sample, aes(x = x, y = y, colour = type)) + geom_point(data=bounds, aes(x = x, y = y), color="green", size=1)
+map + geom_point(data = sample, aes(x = x, y = y, colour = type)) + 
+    geom_point(data=bounds, aes(x = x, y = y), color="green", size=1)
     
 ##################
 # Devuelve la cuenta de tweets dentro de la caja formada por (upright.corner, upright.corner + length)
@@ -69,7 +81,10 @@ map + geom_point(data = sample, aes(x = x, y = y, colour = type)) + geom_point(d
 cuenta.tweets <- function(data, upleft.corner, x.length, y.length){
   sum(data$x > upleft.corner$x & data$x < upleft.corner$x + x.length & data$y > upleft.corner$y & data$y < upleft.corner$y + y.length)
 }
-tweets.por.cuadricula <- sapply(1:dim(bounds)[1], function(i){cuenta.tweets(sample, bounds[i,], 0.009, 0.009)})
+
+tweets.por.cuadricula <- sapply(1:dim(bounds)[1], function(i){
+    cuenta.tweets(sample, bounds[i,], 0.009, 0.009)
+})
 
 
 
