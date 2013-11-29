@@ -1,13 +1,13 @@
 #### Tarea 4 Estadistica
 
 ## 1
-azul<-c(4,69,87,35,39,79,31,79,65,95,68,62,70,80,84,79,66,75,59,77,36,
-        86,39,85,74,72,69,85,85,72)
-rojo<-c(62,80,82,83,0,81,28,69,48,90,63,77,0,55,83,85,54,72,58,68,88,83,
-        78,30,58,45,78,64,87,65)
+azul <- c(4,69,87,35,39,79,31,79,65,95,68,62,70,80,84,79,66,75,59,77,36,
+          86,39,85,74,72,69,85,85,72)
+rojo <- c(62,80,82,83,0,81,28,69,48,90,63,77,0,55,83,85,54,72,58,68,88,83,
+          78,30,58,45,78,64,87,65)
 
 datos = data.frame(
-    identificador = c(rep(0, 20), rep(1, 10)),
+    tipo = c(rep(0, 20), rep(1, 10)),
     azul=azul, rojo=rojo
     )
 
@@ -21,13 +21,14 @@ head(ozone)
 lm.model <- lm(maxO3 ~ T9 + T12 + T15 + Ne9 + Ne12 + Ne15 + 
                    Wx9 + Wx12 + Wx15 + maxO3y, data=ozone)
 
-summary(lm.model)
-
 ## Analisis de error
-coef(summary( lm.model ))[, "Pr(>|t|)"]
+summary(lm.model)
 
 # Segun los valores t Ne9 y max03y no contribuyen
 # a la prediccion de maxO3
+
+## maxO3 = 12.24 - 0.02T9 + 2.22T12 + 0.56T15 - 0.42Ne12 +
+##         0.18Ne15 + 0.94Wx9 + 0.03Wx12 + 0.42Wx15
 
 # Analisis de Residuales
 residuals <- resid(lm.model)
