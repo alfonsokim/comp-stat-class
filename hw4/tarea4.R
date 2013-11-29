@@ -21,12 +21,20 @@ head(ozone)
 lm.model <- lm(maxO3 ~ T9 + T12 + T15 + Ne9 + Ne12 + Ne15 + 
                    Wx9 + Wx12 + Wx15 + maxO3y, data=ozone)
 
-coef(lm.model)
-str(lm.model)
-#Ecuacion: maxO3 = 12.24 -0.01T9 + 2.22T12 + 0.56T15 - 
-#                  2.19Ne9 - 0.42N12 + 0.18Ne15 + 
-#                  0.94Wx9 + 0.03Wx12 + 0.42Wx15 + 0.35max03y
+summary(lm.model)
 
+## Analisis de error
+coef(summary( lm.model ))[, "Pr(>|t|)"]
+
+# Segun los valores t Ne9 y max03y no contribuyen
+# a la prediccion de maxO3
+
+# Analisis de Residuales
+residuals <- resid(lm.model)
+plot(lm.model$fitted.values, residuals, 
+     ylab="Residuales", xlab="O3 Maximo", 
+     main="Analisis de Residuales") 
+abline(0, 0)
 
 ### ==========================================================
 ## 4: Aleatorios
