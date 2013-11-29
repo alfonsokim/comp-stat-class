@@ -1,0 +1,133 @@
+Tarea 4 - Estadística Computacional
+========================================================
+
+Itzel Muñoz - Alfonso Kim
+--------------------------------------------------------
+```{r echo=FALSE}
+options(digits=5)
+setwd("~/r-workspace/comp-stats/hw4") ## Cambiar al directorio de datos
+```
+```{r}
+set.seed(145849)
+```
+
+## Ejercicio 1
+
+```{r}
+azul <- c(4,69,87,35,39,79,31,79,65,95,68,62,70,80,84,79,66,75,59,77,36,
+          86,39,85,74,72,69,85,85,72)
+rojo <- c(62,80,82,83,0,81,28,69,48,90,63,77,0,55,83,85,54,72,58,68,88,83,
+          78,30,58,45,78,64,87,65)
+datos <- data.frame(
+    tipo = c(rep(0, 20), rep(1, 10)),
+    azul=azul, rojo=rojo)
+
+datos
+```
+
+## Ejercicio 2
+
+```{r}
+```
+
+## Ejercicio 3
+
+```{r}
+ozone <- read.table("ozone.txt", header=T, sep=" ")
+head(ozone)
+
+lm.model <- lm(maxO3 ~ T9 + T12 + T15 + Ne9 + Ne12 + Ne15 + 
+                   Wx9 + Wx12 + Wx15 + maxO3y, data=ozone)
+```
+
+### Analisis de Residuales
+
+```{r fig.width=7, fig.height=6}
+summary(lm.model)
+residuals <- resid(lm.model)
+plot(lm.model$fitted.values, residuals, 
+     ylab="Residuales", xlab="O3 Maximo", 
+     main="Analisis de Residuales") 
+abline(0, 0)
+```
+
+
+## Ejercicio 4: Números Aleatorios
+```{r}
+numbers <- read.csv("aleatorios.txt", header=F)
+summary(numbers)
+numbers.fix <- subset(numbers, V1 < 1)
+summary(numbers.fix)
+```
+
+### Prueba chi-cuadrada
+Paso 1: Dividir en intervalos
+```{r}
+bins <- apply(matrix(0:10), 1, function(i) i/10)
+numbers.table <- table(cut(as.matrix(numbers.fix),
+                           breaks=bins, right=F))
+numbers.df <- as.data.frame(numbers.table)
+```
+
+Paso 2: Frecuencia Esperada
+```{r}
+numbers.df$FE <- nrow(numbers.fix) / 10
+```
+
+Paso 3: La frecuencia Observada esta en la columna "Freq"
+Paso 4: Valor de Chi
+```{r}
+numbers.df$Chi <- ((numbers.df$FE - numbers.df$Freq) ^ 2) / numbers.df$FE
+```
+
+Paso 5: Suma de los valores Cho
+```{r}
+chi.sq <- sum(numbers.df$Chi)
+```
+
+Paso 6: Chi en valor en tablas con alfa=0.05 y n-1 g.l.
+```{r}
+chi.sq.2 <- qchisq(p=0.95, df=9)
+```
+
+Verificar
+```{r}
+chi.sq < chi.sq.2
+```
+
+### Prueba Kolmogorov-Smirnov
+Paso 1: Ordenar los numeros
+```{r}
+numbers.sort <- data.frame(x=sort(as.matrix(numbers.fix)))
+```
+
+Paso 2: Distribucion Acumulada
+```{r}
+numbers.sort$DA <- apply(matrix(1:nrow(numbers.sort)), 1, 
+                         function(i) i / nrow(numbers.sort))
+```
+
+Paso 3: Diferencia del valor - la distribucion
+```{r}
+numbers.sort$KS <- numbers.sort$DA - numbers.sort$x
+```
+
+Paso 4: Valor observado
+```{r}
+ds <- max(abs(numbers.sort$KS))
+```
+
+No hay implementacion de la distribucion KS en R.
+Segun http://www.real-statistics.com/statistics-tables/kolmogorov-smirnov-table/
+```{r}
+ds.2 <- 1.36 / sqrt(nrow(numbers.sort))
+```
+
+Verificar
+```{r}
+ds < ds.2
+```
+
+
+```{r fig.width=7, fig.height=6}
+```
