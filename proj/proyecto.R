@@ -3,8 +3,10 @@
 ## Ejemplo: http://pages.stern.nyu.edu/~achinco/programming_examples/Example__PlotGeographicDensity.html
 ## RgoogleMaps: http://cran.r-project.org/web/packages/RgoogleMaps/index.html
 
-library(ggmap)
 library(ggplot2)
+library(ggmap)
+library(plyr)
+
 
 ## Bajar el mapa
 g.map <- get_map(location = c(lon = -99.1393, lat = 19.3772), 
@@ -87,4 +89,83 @@ tweets.por.cuadricula <- sapply(1:dim(bounds)[1], function(i){
 })
 
 
+## ======================================================================
+## ======================================================================
+## ======================================================================
+## ======================================================================
+#### Usando tiempo
+setwd("~/r-workspace/comp-stats/proj")
+tweets <- read.csv("tuits_24nov.txt", header=F)
+names(tweets) <- c("mood", "datetime", "x", "y")
+tweets$mood <- as.factor(tweets$mood)
+### Arreglar la zona horaria, cambio de horario = 27 de Octubre
+tweets$datetime <- as.POSIXct(strptime(tweets$datetime, "%Y-%m-%d %H:%M:%S"), 
+                              tz="Europe/London")
+tweets$mex_datetime <- as.POSIXct(tweets$datetime, tz="America/Mexico_City")
+attributes(tweets$mex_datetime)$tzone <- "America/Mexico_City"
+summary(tweets)
+
+as.POSIXlt(tweets$datetime[1])$wday
+as.POSIXlt(tweets$mex_datetime[1])$hour
+
+# wday: extrae el dia de la semana de una fecha. Domingo = 0
+# hour: lo mismo para la hora
+tweets$weekday <- as.factor(as.POSIXlt(tweets$mex_datetime)$wday)
+tweets$hour <- as.factor(as.POSIXlt(tweets$mex_datetime)$hour)
+summary(tweets)
+
+?subset
+nrow(subset(tweets, hour %in% (0:6)))
+nrow(subset(tweets, hour %in% (7:12)))
+nrow(subset(tweets, hour %in% (13:18)))
+nrow(subset(tweets, hour %in% (19:23)))
+
+tweets$hour.frame <- 0
+tweets[tweets$hour %in% (0:6), ]$hour.frame <- 0
+tweets[tweets$hour %in% (7:12), ]$hour.frame <- 1
+tweets[tweets$hour %in% (13:18), ]$hour.frame <- 2
+tweets[tweets$hour %in% (19:23), ]$hour.frame <- 3
+tweets$hour.frame <- as.factor(tweets$hour.frame)
+summary(tweets)
+
+g.map <- get_map(location = c(lon = -99.1393, lat = 19.3772), 
+                 zoom = 11, maptype = 'roadmap')
+map <- ggmap(g.map)
+
+happy.map <- map + 
+    geom_point(data = subset(tweets, hour %in% (0:6) & mood == 1 & weekday == 1), 
+               aes(x = x, y = y), colour = "green", size = 2)
+happy.map
+
+map.grid.mood <- expand.grid(hour.frame=0:3, weekday=0:6, mood=c(-1, 1))
+map.grid <- expand.grid(hour.frame=0:3, weekday=0:6)
+
+?subset
+?sapply
+
+maps <- list()
+
+?ggtitle
+ddply(map.grid, c("hour.frame", "weekday"), function(p) {
+    this.points <- subset(tweets, 
+                          hour.frame == p$hour.frame & weekday == p$weekday,
+                          select = c("x", "y", "mood"))
+    map.name = paste("hora_", p$hour.frame, "_dia_", p$weekday, ".jpg", sep="")
+    map <- (map + geom_point(data = this.points, 
+                          aes(x = x, y = y, colour = mood), size = 1) + 
+                ggtitle(map.name))
+    ggsave(filename=map.name, plot=map)
+    NULL
+})
+
+
+map + geom_point(data = subset(tweets, 
+                               hour.frame == 0 & weekday == 0,
+                               select = c("x", "y", "mood")), 
+                         aes(x = x, y = y, colour = mood), size = 1)
+
+?geom_point
+maps
+length(all.maps$x)
+nrow(tweets)
 
