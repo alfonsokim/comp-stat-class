@@ -6,7 +6,7 @@
 library(ggplot2)
 library(ggmap)
 library(plyr)
-
+library(reshape2)
 
 ## Bajar el mapa
 g.map <- get_map(location = c(lon = -99.1393, lat = 19.3772), 
@@ -23,6 +23,7 @@ sad.coordinates <- read.csv(file="coord_tristes.txt", header=F)
 names(sad.coordinates) <- c("x", "y")
 head(sad.coordinates)
 
+all.tweets <- rbind(happy.coordinates,sad.coordinates)
 
 #Dibuja todos los tweets
 #coord_map <- map + 
@@ -65,9 +66,17 @@ build.lattice <- function(cut.length, cut.width, xmin, xmax, ymin, ymax){
   expand.grid(x = x.seq, y = y.seq)
 }
 
-bounds <- build.lattice(.009, .009, 
-                        xmin = -99.3, xmax = -99.0, 
-                        ymin = 19.25, ymax = 19.58)
+x_min = -99.3
+x_max = -98.98
+dx = 0.009
+
+y_min = 19.20
+y_max = 19.58
+dy = 0.009
+
+bounds <- build.lattice(dx, dy, 
+                        xmin = x_min, xmax = x_max, 
+                        ymin = y_min, ymax = y_max)
 
 map + geom_point(data = sample, aes(x = x, y = y, colour = type)) + 
     geom_point(data=bounds, aes(x = x, y = y), color="green", size=1)
@@ -85,8 +94,43 @@ cuenta.tweets <- function(data, upleft.corner, x.length, y.length){
 }
 
 tweets.por.cuadricula <- sapply(1:dim(bounds)[1], function(i){
-    cuenta.tweets(sample, bounds[i,], 0.009, 0.009)
+    c(cuenta.tweets(happy.coordinates, bounds[i,], dx, dy), cuenta.tweets(sad.coordinates, bounds[i,], dx, dy))
 })
+
+tweets.df <- data.frame(x = seq(x_min,x_max,dx), y = seq(y_min, y_max,dy), pos = tweets.por.cuadricula[1,], neg = tweets.por.cuadricula[2,], c = tweets.por.cuadricula[1,] + tweets.por.cuadricula[2,])
+summary(tweets.df)
+tweets.melt <- melt(tweets.df[which(tweets.df$pos + tweets.df$neg > 0),], id=c("x","y"))
+
+############# Mapa de las posiciones con mas tweets ################
+map + geom_point(aes(x = x, y = y, size = c, colour = c), data=tweets.df[which(tweets.df$c > 0),])
+map + geom_point(aes(x = x, y = y, colour = variable, size = value), data = tweets.melt)+facet_wrap(~variable)
+
+############# HEATMAP ##################
+## Todos los tweets
+map + stat_density2d(aes(x = x, y = y, fill = ..level.., alpha = ..level..),data=all.tweets, size = 2, bins = 4, geom = 'polygon') + scale_fill_gradient(high="#ff0000")+scale_alpha(range=c(.4,.75), guide=FALSE)+guides(fill = guide_colorbar(bardwidht=1.5, barweight=10))
+
+
+
+## ======================================================================
+##                      PRUEBAS DE HIPOTESIS
+## ======================================================================
+##
+# Hipotesis 0: El número de tweets en cualquier punto de la ciudad es igual
+#              ie., la distribución de tweets es uniforme en la cuadricula
+# Hipotesis 1: La distribución no es uniforme en la cuadricula
+#
+# Bajo H0, tenemos 1548 puntos que tienen que tener el mismo numero de tweets cada uno (total / 1548).
+# Podemos utilizar el estadistico Chi para medir que tan buena es la aproximación uniforme
+# a los datos encontrados.
+chisq.test(tweets.df$c)
+# Evidentemente, rechazamos la hipótesis nula de que todos los tweets se 
+# encuentran dispersos uniformemente
+
+##
+#
+# Considerando solamente tweets negativos
+#
+chisq.test(tweets.df$neg)
 
 
 ## ======================================================================
