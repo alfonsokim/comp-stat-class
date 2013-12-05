@@ -103,7 +103,13 @@ tweets.melt <- melt(tweets.df[which(tweets.df$pos + tweets.df$neg > 0),], id=c("
 
 ############# Mapa de las posiciones con mas tweets ################
 map + geom_point(aes(x = x, y = y, size = c, colour = c), data=tweets.df[which(tweets.df$c > 0),])
-map + geom_point(aes(x = x, y = y, colour = variable, size = value), data = tweets.melt)+facet_wrap(~variable)
+pos_neg_c_map <- map + geom_point(aes(x = x, y = y, colour = variable, size = value), data = tweets.melt)+facet_wrap(~variable)
+pos_neg_c_map
+
+############## Lugares interesantes ###################
+interesantes <- geocode(c("Estadio Azteca", "Gran Sur", "Bosque de chapultepec", "Teatro Insurgentes"))
+ggmap(get_googlemap('mexico city', markers = interesantes, zoom = 11, maptype="roadmap"), extent="device") + geom_point(aes(x = x, y = y, colour = variable, size = value), data = tweets.melt)
+
 
 ############# HEATMAP ##################
 ## Todos los tweets
