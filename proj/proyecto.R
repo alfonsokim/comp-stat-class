@@ -111,6 +111,13 @@ map + geom_point(aes(x = x, y = y, colour = variable, size = value),
                  data = tweets.melt)+facet_wrap(~variable) + 
     scale_fill_manual(values = c("pos" = "blue", "neg" = "red", "c" = "purple"))
 
+pos_neg_c_map <- map + geom_point(aes(x = x, y = y, colour = variable, size = value), data = tweets.melt)+facet_wrap(~variable)
+pos_neg_c_map
+
+############## Lugares interesantes ###################
+interesantes <- geocode(c("Estadio Azteca", "Gran Sur", "Bosque de chapultepec", "Teatro Insurgentes"))
+ggmap(get_googlemap('mexico city', markers = interesantes, zoom = 11, maptype="roadmap"), extent="device") + geom_point(aes(x = x, y = y, colour = variable, size = value), data = tweets.melt)
+
 ############# HEATMAP ##################
 ## Todos los tweets
 map + stat_density2d(aes(x = x, y = y, fill = ..level.., alpha = ..level..),data=all.tweets, size = 2, bins = 4, geom = 'polygon') + scale_fill_gradient(high="#ff0000")+scale_alpha(range=c(.4,.75), guide=FALSE)+guides(fill = guide_colorbar(bardwidht=1.5, barweight=10))
