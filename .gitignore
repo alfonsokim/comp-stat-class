@@ -1,3 +1,8 @@
+tuits_24nov.txt
+
+*.Rdata
+*.Rhistory
+bck_*
 *.jpg
 *.bbl
 *.blg

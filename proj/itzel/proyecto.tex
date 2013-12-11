@@ -1,0 +1,618 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[right=3cm,left=3cm,top=3.2cm,bottom=3.2cm,headsep=0cm,footskip=1.5cm]{geometry}
+
+\author{Itzel Muñoz, Victor Martínez, Alfonso Kim}
+\date{Diciembre 2013}
+\title{Estadística Computacional. Proyecto final.}
+
+\begin{document}
+
+\tableofcontents
+\thispagestyle{empty}
+
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+
+\begin{abstract}
+algo
+\end{abstract}
+
+\section{Objetivo}
+		Mostrar la existencia de una dependencia entre el estado de ánimo de los habitantes de la Ciudad de México y el lugar donde se encuentran dentro de ella a partir de información pública geolocalizada (\emph{Twitter}).\\[.3cm]
+%
+El presente trabajo buscará definir una medida colectiva del humor (positivo o negativo) para los usuarios de \emph{Twitter} en la Ciudad de México. Se plantea como hipótesis de trabajo que es posible detectar zonas dentro de la ciudad con una medida mayormente positiva (e.g. lugares turísticos, museos, centros comerciales, etc) y lugares donde el sentimiento sea mayormente negativo (e.g. centros de sanciones, delegaciones, entre otros). 
+
+
+	\section{Introducción}
+		El mundo en el que vivimos actualmente es un mundo globalizado en el cual el uso de las redes sociales crece majestuosamente. Gracias a que hoy en día las noticias se dan a conocer inmediatamente, el público puede responder a éstas al instante mediante estas redes. Las repercusiones de lo que se expresa en ellas y su alcance son impresionantes. Es por esto que se ha vuelto de gran interés el análisis de la información que se puede extraer de las redes sociales.\\[.3cm]
+%
+\emph{Twitter}, una red social con más de 500 millones de usuarios a nivel mundial, permite la transmisión de mensajes de texto cortos (menos de 140 caracteres), llamados \emph{tweets}, de manera pública o a un grupo selecto de usuarios o seguidores. En esta red es posible proporcionar tu ubicación, y dadas sus características, el contenido de los \emph{tweets} suelen ser opiniones y/o sentimientos que los usuarios piensan y/o sienten en ese preciso momento. Por ello es natural el pensar en una relación entre el estado de ánimo de las personas y su localización dentro de la ciudad. De hecho, muchos estudios se han centrado en analizar el contenido de estos mensajes para inferir los estados de ánimo dentro de una población, obteniendo resultados similares a los de los encuestadores \cite{Oconnor, Bollen}.\\[.3cm]
+%
+El pensar en una relación "humor-espacial" \ es algo natural pues no se experimentan las mismas emociones en un estadio de futból, en un hospital o en un centro nocturno. Las razones por las que una persona se encuentra en cierto lugar pueden ser tan fuertes que influyen en su estado de ánimo, o bien, el entorno que rodea a la persona tiene la posibilidad de afectar su humor, esto se ve reflejado en aquello que expresa vía \emph{Twitter}. Ambos casos muestran que los sentimientos pueden estar relacionados con la ubicación de los individuos.\\[.3cm]
+%
+%De aquí surge la motivación para el tema del proyecto.
+		
+\newpage
+
+\section{Datos}
+	Se utilizó el API (Interfaz de Programación de Aplicaciones, por sus siglas en inglés) para extraer los \emph{tweets} que son generados dentro del Distrito Federal y área conurbada, en el rectángulo definido por las coordenadas $19.11,-99.36$ y $19.57,-98.97$.\\[.3cm]
+%		
+Dicha extracción se realiza por un proceso en un servidor en Amazon EC2 que está conectado al API de \emph{Twitter} las 24 horas del día. El proceso está desarrollado en Python usando la librería Tweepy \cite{tweepy}. Dada la gran cantidad de \emph{tweets} que estamos recopilando fue necesario usar un sistema manejador de bases de datos, decidimos usar Postgres.\\[.3cm]
+%
+Al día 3 de noviembre del 2013 contamos con más de $5,287,000$ extraidos desde el 18 de junio hasta el 14 de agosto, y desde el 16 de septiembre en adelante, actualmente seguimos extrayendo \emph{tweets} con un promedio de $49,000$ \emph{tweets} diarios. Todos estos contienen la información geográfica (latitud, longitud) de dónde fueron generados.\\[.3cm]
+%
+Es importante notar que, por las condiciones socio-políticas de la Ciudad de México, nuestros datos representan una muestra sesgada de la población, es decir, se captura con mayor probabilidad datos de los estratos de clases sociales alta y media-alta. 
+
+\subsection{Manejo de lo datos}
+	    Siguiendo el proceso de etiquetación automática propuesto por Go, Bhayani y Huang \cite{Go} se separaron los \emph{tweets} ``felices''  y ``tristes'' (positivos y negativos, respectivamente) usando cadenas de caracteres que denotan dichas emociones (\emph{emoticons}).
+	    
+	    \noindent Para denotar felicidad se usaron \emph{tweets} que contienen:
+	\begin{multicols}{3}
+	\begin{itemize}
+        \item :)
+        \item (:
+        \item =) 
+        \item (=
+        \item :-)
+        \item (-:
+        \item :P
+        \item :p
+        \item :D
+        \item =D
+        \item jaja
+    \end{itemize}
+    \end{multicols}
+    
+
+        \noindent Para encontrar los \emph{tweets} que denotan tristeza se utilizó:
+    \begin{multicols}{3}
+	\begin{itemize}
+        \item :(
+        \item ):
+        \item =( 
+        \item )=
+        \item ;(
+        \item :-(
+        \item )-:
+    \end{itemize}
+    \end{multicols}
+    
+ %\noindent  Una vez separados los tweets se realizará un análisis espacial para aceptar o rechazar la hipótesis sobre la influencia de la ubicación de una persona en su estado de ánimo.
+
+\newpage
+
+\section{Análisis exploratorio}
+
+	Antes de realizar un análisis profundo de los datos con los que se cuenta se llevo a cabo uno exploratorio para conocer sus características.\\[.3cm]
+%
+Se analizaron primero las variables por separado (longitud y latitud) mediante tablas de frecuencias e histogramas; después se realizó un análisis bivariado con gráficas de dispersión. \\[.3cm]
+%
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de la variable longitud } \\
+  \hline
+Linf	&	Lsup	&	f	&	fr        	&	   F	&	 Fr		\\    \hline
+-111	&	-109	&	4	&	7.69E-06	&	4	&	7.69E-06	\\	\hline
+-109	&	-107	&	0	&	0.00E+00	&	4	&	7.69E-06	\\	\hline
+-107	&	-105	&	0	&	0.00E+00	&	4	&	7.69E-06	\\	\hline
+-105	&	-103	&	2	&	3.85E-06	&	6	&	1.15E-05	\\	\hline
+-103	&	-101	&	2	&	3.85E-06	&	8	&	1.54E-05	\\	\hline
+-101	&	-99	&	475313	&	9.14E-01	&	475321	&	9.14E-01	\\	\hline
+-99	&	-97	&	7257	&	1.40E-02	&	482578	&	9.28E-01	\\	\hline
+-97	&	-95	&	34	&	6.54E-05	&	482612	&	9.28E-01	\\	\hline
+-95	&	-93	&	6	&	1.15E-05	&	482618	&	9.28E-01	\\	\hline
+-93	&	-91	&	10	&	1.92E-05	&	482628	&	9.28E-01	\\	\hline
+-91	&	-89	&	14449	&	2.78E-02	&	497077	&	9.56E-01	\\	\hline
+-89	&	-87	&	20938	&	4.03E-02	&	518015	&	9.96E-01	\\	\hline
+-87	&	-85	&	1961	&	3.77E-03	&	519976	&	1.00E+00	\\	\hline
+
+\end{tabular}
+
+\end{center}
+
+
+\begin{figure}[b]
+\centering
+\begin{tabular}{cc}
+   \includegraphics[width=7.5cm]{histTodosLong.png}
+   \includegraphics[width=7.5cm]{histTodosLat.png}
+\end{tabular}
+\caption{Histogramas de todos los \emph{tweets}, felices y tristes, sin limitar las coordenadas.}
+\end{figure}
+%
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de la variable latitud } \\
+  \hline
+Linf	&	Lsup	&	f	&	fr	&	F	&	Fr	\\	\hline
+14	&	16	&	32330	&	6.22E-02	&	32330	&	0.06217595	\\	\hline
+16	&	18	&	4889	&	9.40E-03	&	37219	&	0.0715783	\\	\hline
+18	&	20	&	482604	&	9.28E-01	&	519823	&	0.99970576	\\	\hline
+20	&	22	&	3	&	5.77E-06	&	519826	&	0.99971153	\\	\hline
+22	&	24	&	91	&	1.75E-04	&	519917	&	0.99988653	\\	\hline
+24	&	26	&	10	&	1.92E-05	&	519927	&	0.99990576	\\	\hline
+26	&	28	&	31	&	5.96E-05	&	519958	&	0.99996538	\\	\hline
+28	&	30	&	17	&	3.27E-05	&	519975	&	0.99999808	\\	\hline
+30	&	32	&	1	&	1.92E-06	&	519976	&	1	\\	\hline
+
+\end{tabular}
+
+\end{center}
+
+
+\noindent Al limitar los \emph{tweets} a aquellos localizados en el Distrito Federal y área metropolitana (dentro del rectángulo definido por las coordenadas $(-99.6,19)$, $(-98.8,19)$, $(-99.6,20)$ y $(-98.8,20)$ se obtiene:
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de la variable longitud } \\
+  \hline
+Linf	&	Lsup	&	f	&	fr	&	F	&	Fr	\\	\hline
+-99.6	&	-99.55	&	1	&	2.07E-06	&	1	&	2.07E-06	\\	\hline
+-99.55	&	-99.5	&	4	&	8.29E-06	&	5	&	1.04E-05	\\	\hline
+-99.5	&	-99.45	&	465	&	9.64E-04	&	470	&	9.74E-04	\\	\hline
+-99.45	&	-99.4	&	236	&	4.89E-04	&	706	&	1.46E-03	\\	\hline
+-99.4	&	-99.35	&	1105	&	2.29E-03	&	1811	&	3.75E-03	\\	\hline
+-99.35	&	-99.3	&	2477	&	5.13E-03	&	4288	&	8.89E-03	\\	\hline
+-99.3	&	-99.25	&	28674	&	5.94E-02	&	32962	&	6.83E-02	\\	\hline
+-99.25	&	-99.2	&	75061	&	1.56E-01	&	108023	&	2.24E-01	\\	\hline
+-99.2	&	-99.15	&	177597	&	3.68E-01	&	285620	&	5.92E-01	\\	\hline
+-99.15	&	-99.1	&	120766	&	2.50E-01	&	406386	&	8.42E-01	\\	\hline
+-99.1	&	-99.05	&	47386	&	9.82E-02	&	453772	&	9.40E-01	\\	\hline
+-99.05	&	-99	&	21540	&	4.46E-02	&	475312	&	9.85E-01	\\	\hline
+-99	&	-98.95	&	5876	&	1.22E-02	&	481188	&	9.97E-01	\\	\hline
+-98.95	&	-98.9	&	1300	&	2.69E-03	&	482488	&	1.00E+00	\\	\hline
+-98.9	&	-98.85	&	44	&	9.12E-05	&	482532	&	1.00E+00	\\	\hline
+-98.85	&	-98.8	&	3	&	6.22E-06	&	482535	&	1.00E+00	\\	\hline
+\end{tabular}
+\end{center}
+
+\begin{figure}[h!]
+\centering
+   \includegraphics[width=9cm]{histTodosLimLong.png}
+\caption{Histogramas de todos los \emph{tweets}, felices y tristes, limitando las coordenadas.}
+\end{figure}
+
+
+\newpage
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de la variable latitud } \\
+  \hline
+Linf	&	Lsup	&	f	&	fr	&	F	&	Fr	\\	\hline
+19	&	19.05	&	62	&	0.000128488	&	62	&	0.000128488	\\	\hline
+19.05	&	19.1	&	112	&	0.000232108	&	174	&	0.000360596	\\	\hline
+19.1	&	19.15	&	65	&	0.000134705	&	239	&	0.000495301	\\	\hline
+19.15	&	19.2	&	694	&	0.001438238	&	933	&	0.001933539	\\	\hline
+19.2	&	19.25	&	3873	&	0.008026361	&	4806	&	0.009959899	\\	\hline
+19.25	&	19.3	&	41573	&	0.086155408	&	46379	&	0.096115308	\\	\hline
+19.3	&	19.35	&	86333	&	0.178915519	&	132712	&	0.275030827	\\	\hline
+19.35	&	19.4	&	108799	&	0.2254738	&	241511	&	0.500504627	\\	\hline
+19.4	&	19.45	&	122425	&	0.253712166	&	363936	&	0.754216793	\\	\hline
+19.45	&	19.5	&	52762	&	0.109343364	&	416698	&	0.863560156	\\	\hline
+19.5	&	19.55	&	41408	&	0.085813464	&	458106	&	0.949373621	\\	\hline
+19.55	&	19.6	&	16454	&	0.034099081	&	474560	&	0.983472702	\\	\hline
+19.6	&	19.65	&	6987	&	0.014479779	&	481547	&	0.99795248	\\	\hline
+19.65	&	19.7	&	988	&	0.00204752	&	482535	&	1	\\	\hline
+\end{tabular}
+\end{center}
+
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=9cm]{histTodosLimLat.png}
+\caption{Histogramas de todos los \emph{tweets}, felices y tristes, limitando las coordenadas.}
+\end{figure}
+
+
+
+\newpage
+
+\noindent En las gráficas de dispersión se observa lo siguiente:
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{dispTodos.png}
+\caption{Utilizando todos los datos.}
+\end{figure}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{dispTodosLim.png}
+\caption{Limitando a los datos del DF y área metropolitana.}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{dispTodosGris.jpg}
+\end{figure}
+
+\newpage
+
+\noindent Analizando ahora los \emph{tweets} separados como felices y tristes se tiene:
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de longitud para \emph{tweets} felices.} \\
+  \hline
+Linf	&	Lsup	&	f	&	fr	&	F	&	Fr	\\	\hline
+-99.6	&	-99.55	&	1	&	2.51E-06	&	1	&	2.51E-06	\\	\hline
+-99.55	&	-99.5	&	4	&	1.00E-05	&	5	&	1.25E-05	\\	\hline
+-99.5	&	-99.45	&	415	&	1.04E-03	&	420	&	1.05E-03	\\	\hline
+-99.45	&	-99.4	&	188	&	4.71E-04	&	608	&	1.52E-03	\\	\hline
+-99.4	&	-99.35	&	903	&	2.26E-03	&	1511	&	3.79E-03	\\	\hline
+-99.35	&	-99.3	&	1962	&	4.92E-03	&	3473	&	8.71E-03	\\	\hline
+-99.3	&	-99.25	&	23918	&	6.00E-02	&	27391	&	6.87E-02	\\	\hline
+-99.25	&	-99.2	&	62411	&	1.56E-01	&	89802	&	2.25E-01	\\	\hline
+-99.2	&	-99.15	&	149018	&	3.74E-01	&	238820	&	5.99E-01	\\	\hline
+-99.15	&	-99.1	&	98384	&	2.47E-01	&	337204	&	8.45E-01	\\	\hline
+-99.1	&	-99.05	&	38350	&	9.61E-02	&	375554	&	9.41E-01	\\	\hline
+-99.05	&	-99	&	17362	&	4.35E-02	&	392916	&	9.85E-01	\\	\hline
+-99	&	-98.95	&	4929	&	1.24E-02	&	397845	&	9.97E-01	\\	\hline
+-98.95	&	-98.9	&	1033	&	2.59E-03	&	398878	&	1.00E+00	\\	\hline
+-98.9	&	-98.85	&	40	&	1.00E-04	&	398918	&	1.00E+00	\\	\hline
+-98.85	&	-98.8	&	2	&	5.01E-06	&	398920	&	1.00E+00	\\	\hline
+\end{tabular}
+\end{center}
+
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de latitud para \emph{tweets} felices.} \\
+  \hline
+Linf	&	Lsup	&	f	&	fr	&	F	&	Fr	\\	\hline
+19	&	19.05	&	50	&	0.000125338	&	50	&	0.000125338	\\	\hline
+19.05	&	19.1	&	99	&	0.00024817	&	149	&	0.000373509	\\	\hline
+19.1	&	19.15	&	50	&	0.000125338	&	199	&	0.000498847	\\	\hline
+19.15	&	19.2	&	569	&	0.001426351	&	768	&	0.001925198	\\	\hline
+19.2	&	19.25	&	3107	&	0.007788529	&	3875	&	0.009713727	\\	\hline
+19.25	&	19.3	&	33914	&	0.085014539	&	37789	&	0.094728266	\\	\hline
+19.3	&	19.35	&	70099	&	0.175721949	&	107888	&	0.270450216	\\	\hline
+19.35	&	19.4	&	90893	&	0.227847689	&	198781	&	0.498297904	\\	\hline
+19.4	&	19.45	&	103439	&	0.259297604	&	302220	&	0.757595508	\\	\hline
+19.45	&	19.5	&	42981	&	0.107743407	&	345201	&	0.865338915	\\	\hline
+19.5	&	19.55	&	34031	&	0.085307831	&	379232	&	0.950646746	\\	\hline
+19.55	&	19.6	&	13199	&	0.033086835	&	392431	&	0.983733581	\\	\hline
+19.6	&	19.65	&	5676	&	0.014228417	&	398107	&	0.997961997	\\	\hline
+19.65	&	19.7	&	813	&	0.002038003	&	398920	&	1	\\	\hline
+
+\end{tabular}
+\end{center}
+
+
+\begin{figure}[h!]
+\centering
+\begin{tabular}{cc}
+   \includegraphics[width=7.5cm]{histLongFelices.png}
+   \includegraphics[width=7.5cm]{histLatFelices.png}
+\end{tabular}
+\caption{Histogramas de \emph{tweets} felices.}
+\end{figure}
+
+
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de longitud para \emph{tweets} tristes.} \\
+  \hline
+Linf	&	Lsup	&	f	&	fr	&	F	&	Fr	\\	\hline
+-99.5	&	-99.45	&	50	&	5.98E-04	&	50	&	0.000597979	\\	\hline
+-99.45	&	-99.4	&	48	&	5.74E-04	&	98	&	0.001172039	\\	\hline
+-99.4	&	-99.35	&	202	&	2.42E-03	&	300	&	0.003587873	\\	\hline
+-99.35	&	-99.3	&	515	&	6.16E-03	&	815	&	0.009747055	\\	\hline
+-99.3	&	-99.25	&	4756	&	5.69E-02	&	5571	&	0.066626801	\\	\hline
+-99.25	&	-99.2	&	12650	&	1.51E-01	&	18221	&	0.217915446	\\	\hline
+-99.2	&	-99.15	&	28579	&	3.42E-01	&	46800	&	0.559708186	\\	\hline
+-99.15	&	-99.1	&	22382	&	2.68E-01	&	69182	&	0.827387431	\\	\hline
+-99.1	&	-99.05	&	9036	&	1.08E-01	&	78218	&	0.935454165	\\	\hline
+-99.05	&	-99	&	4178	&	5.00E-02	&	82396	&	0.985421276	\\	\hline
+-99	&	-98.95	&	947	&	1.13E-02	&	83343	&	0.996746995	\\	\hline
+-98.95	&	-98.9	&	267	&	3.19E-03	&	83610	&	0.999940202	\\	\hline
+-98.9	&	-98.85	&	4	&	4.78E-05	&	83614	&	0.99998804	\\	\hline
+-98.85	&	-98.8	&	1	&	1.20E-05	&	83615	&	1	\\	\hline
+
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{| l | l | l | l | l | l | }
+\hline
+  \multicolumn{6}{| c | }{Tabla de frecuencias de latitud para \emph{tweets} tristes.} \\
+  \hline
+Linf	&	Lsup	&	f	&	fr	&	F	&	Fr	\\	\hline
+19	&	19.05	&	12	&	0.000143515	&	12	&	0.000143515	\\	\hline
+19.05	&	19.1	&	13	&	0.000155475	&	25	&	0.000298989	\\	\hline
+19.1	&	19.15	&	15	&	0.000179394	&	40	&	0.000478383	\\	\hline
+19.15	&	19.2	&	125	&	0.001494947	&	165	&	0.00197333	\\	\hline
+19.2	&	19.25	&	766	&	0.009161036	&	931	&	0.011134366	\\	\hline
+19.25	&	19.3	&	7659	&	0.091598397	&	8590	&	0.102732763	\\	\hline
+19.3	&	19.35	&	16234	&	0.194151767	&	24824	&	0.29688453	\\	\hline
+19.35	&	19.4	&	17906	&	0.214148179	&	42730	&	0.511032709	\\	\hline
+19.4	&	19.45	&	18986	&	0.227064522	&	61716	&	0.738097231	\\	\hline
+19.45	&	19.5	&	9781	&	0.116976619	&	71497	&	0.85507385	\\	\hline
+19.5	&	19.55	&	7377	&	0.088225797	&	78874	&	0.943299647	\\	\hline
+19.55	&	19.6	&	3255	&	0.038928422	&	82129	&	0.982228069	\\	\hline
+19.6	&	19.65	&	1311	&	0.015679005	&	83440	&	0.997907074	\\	\hline
+19.65	&	19.7	&	175	&	0.002092926	&	83615	&	1	\\	\hline
+
+\end{tabular}
+\end{center}
+
+
+
+
+\begin{figure}[h!]
+\centering
+\begin{tabular}{cc}
+   \includegraphics[width=7.5cm]{histLongTristes.png}
+   \includegraphics[width=7.5cm]{histLatTristes.png}
+\end{tabular}
+\caption{Histogramas de \emph{tweets} tristes.}
+\end{figure}
+
+\newpage
+
+\noindent En cuanto al análisis bivariado:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{dispFelicesGris.jpg}
+\caption{Limitando a los datos del DF y área metropolitana.}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{dispTristesGris.jpg}
+\caption{Limitando a los datos del DF y área metropolitana.}
+\end{figure}
+
+\newpage
+
+\noindent Comparando las variables latitiud y longitud de acuerdo al tipo de \emph{tweet}:\\[.3cm]
+
+\begin{center}
+\begin{tabular}{cc}
+\centering
+
+\begin{tabular}{| l | l | l | }
+\hline
+  \multicolumn{3}{| c | }{Longitud} \\
+  \hline
+&	felices 	&	tristes	\\	\hline
+Min.	&	-99.59	&	-99.49	\\	\hline
+1st Qu.	&	-99.19	&	-99.19	\\	\hline
+Median	&	-99.16	&	-99.16	\\	\hline
+Mean	&	-99.16	&	-99.15	\\	\hline
+3rd Qu.	&	-99.12	&	-99.12	\\	\hline
+Max.	&	-98.85	&	-98.85	\\	\hline
+\end{tabular}
+
+\begin{tabular}{| l | l | l | }
+\hline
+  \multicolumn{3}{| c | }{Latitud} \\
+  \hline
+&	felices 	&	tristes	\\	\hline
+Min.	&	19.01	&	19	\\	\hline
+1st Qu.	&	19.34	&	19.34	\\	\hline
+Median	&	19.4	&	19.4	\\	\hline
+Mean	&	19.4	&	19.4	\\	\hline
+3rd Qu.	&	19.45	&	19.45	\\	\hline
+Max.	&	19.7	&	19.7	\\	\hline
+\end{tabular}
+
+\end{tabular}
+\end{center}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{braFelicesLong.png}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{braFelicesLat.png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{braTristesLong.png}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{braTristesLat.png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{densFelices.png}
+\end{figure}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{densFelicesZoom.png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{densTristes.png}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{densTristesZoom.png}
+\end{figure}
+
+\newpage
+
+\section{Métodos estadísticos}
+
+	Para probar la hipótesis de trabajo se buscará encontrar aquellas zonas en las que hay una mayor cantidad de \emph{tweets} felices y/o tristes para de esta manera ubicar qué lugares específicos se encuentran dentro de esas zonas. Esto se realizará mediante métodos de graficación sobre un mapa del Distrito Federal y sus alrededores.\\[.3cm]
+	Aprovechando el que se cuenta con las coordenadas exactas de cada \emph{tweet} se intentará encontrar un patrón de éstas mediante el uso de la función de Ripley $\mathcal{K} (r)$.\\[.3cm]
+%
+Esta función es tal que $\lambda \mathcal{K} (r)$ es igual al número de puntos adicionales a una distancia $r$ de un punto del conjunto $X$, en el caso en que $X$ es un proceso estacionario, donde $\lambda$ es la tasa de intensidad del proceso. En el caso en que $X$ es un proceso no estacionario, suponiendo que $x$ es un punto del proceso con tasa de intensidad $\lambda (u)$ en una locación $u$, se define $\mathcal{K} (r)$ de manera que sea igual al valor esperado de la suma de todos los términos $1/ \lambda(x_j)$ sobre todos los puntos $x_j$ en el proceso $X$ separados de un punto $u$ a una distancia menor a $r$. \cite{spatstat}\\[.3cm]
+%
+Una vez obtenido el patrón, se tratará de ajustar un modelo a los datos.\\[.3cm]
+
+
+
+\newpage
+
+\section{Resultados}
+
+\subsection{Ajuste de un modelo}
+
+	Al intentar ajustar un modelo asumiendo que el proceso es estacionario se obtuvieron las siguientes gráficas:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{KestFelices.png}
+\end{figure}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{KestTristes.png}
+\end{figure}
+
+
+\noindent Esto muestra que el supuesto de estacionariedad es incorrecto.\\[.3cm]
+
+\newpage
+%
+\noindent Asumiendo ahora que el proceso no es homogéneo y utilizando como tasa de intensidad $\lambda(x,y) = exp(a + bx)$, done $x$ y $y$ son las coordenas, se obtuvo:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{KinTristes.png}
+\end{figure}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{fitTristes.png}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{estiTristes.png}
+\end{figure}
+
+\noindent Como se puede ver, es complicada la interpretación de estas últimas dos imágenes debido a la cantidad de datos.
+
+\noindent El resultado para los \emph{tweets} felices no se presenta, pues debido a la cantidad de datos después de dejar durante una hora corriendo la instrucción ésta aún no terminaba.
+
+
+\subsection{Uniformidad}
+
+	Graficando los \emph{tweets} tristes y felices, sobre un mapa se obtuvo:
+
+
+
+\begin{figure}[h!]
+\centering
+\begin{tabular}{cc}
+   \includegraphics[width=7.5cm]{mapaFelices.png}
+   \includegraphics[width=7.5cm]{mapaTristes.png}
+\end{tabular}
+\caption{\emph{tweets} felices (lado izquierdo) y \emph{tweets} tristes (lado derecho)}
+\end{figure}
+
+\newpage
+
+\noindent Por lo tanto se realizaron gráficas de acuerdo a la densidad de los \emph{tweets}:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{heatmap_tweets.png}
+\caption{Todos los \emph{tweets}}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{todos.png}
+\caption{Todos los \emph{tweets}}
+\end{figure}
+
+
+
+\newpage
+
+\begin{center}
+\begin{tabular}{| l | l | l | l| l| l| }
+\hline
+  %\multicolumn{6}{| c | }{Longitud} \\
+  %\hline
+	&	x	&	y	&	pos	&	neg	&	c	\\	\hline	
+Min.	&	-99.3	&	19.2	&	0	&	0	&	0	\\	\hline	
+1st Qu.	&	-99.22	&	19.29	&	7	&	1	&	7	\\	\hline	
+Median	&	-99.14	&	19.39	&	97	&	20	&	116.5	\\	\hline	
+Mean	&	-99.14	&	19.39	&	247.9	&	51.85	&	299.8	\\	\hline	
+3rd Qu.	&	-99.06	&	19.49	&	295	&	68	&	368	\\	\hline	
+Max.	&	-98.98	&	19.58	&	4150	&	675	&	4825	\\	\hline	
+\end{tabular}
+\end{center}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=.55]{distribucionTodos.jpg}
+\end{figure}
+
+
+\newpage
+
+\section{Conclusiones}
+
+
+
+\newpage
+
+\section{Anexo: código en R}
+
+\newpage
+
+\section{Referencias}
+
+    \begin{thebibliography}{9}
+    \bibitem{Bollen}
+    Bollen, J., Mao, H., Pepe, A.: \emph{Modeling public mood and emotion: Twitter sentiment and socio-economic phenomena}. In: ICWSM. (2011)
+    \bibitem{Oconnor}
+    O’Connor, B., Balasubramanyan, R., Routledge, B.R., Smith, N.A.: \emph{From tweets to polls: Linking text sentiment to public opinion time series}. ICWSM 11 (2010) 122–129
+    \bibitem{Go}
+    Go, A., Bhayani, R., Huang, L.: Twitter sentiment classification using distant supervision. CS224N Project Report, Stanford (2009) 1–12
+    \bibitem{tweepy}
+        https://github.com/tweepy/tweepy
+   \bibitem{spatstat}
+   Baddeley, Adrian, Turner, Rolf: \emph{Package 'spatstat'}, (2013)
+    \end{thebibliography}
+
+\end{document}
