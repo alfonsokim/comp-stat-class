@@ -1,0 +1,89 @@
+Antonio Fragoso
+
+Examen Final: Estadística computaciona
+========================================================
+
+1.
+
+  a) Escriba la función para calcular la suma de ganancias de los 20 juegos en la ruleta. Utilice la función replicate para repetir esta simulación 20 juegos unas 100 veces. Encontrar la prob. de que la ganancia sea positiva.
+
+```{r}
+library(bootstrap)
+
+# FUNCION PARA CALCULAR SUMA DE GANANCIAS
+set.seed(88816)
+sumaGanancias<-function(){sum(sample(c(5,-5),20,replace=T,prob=c(18/38,20/38)))}
+juegos100 <- replicate(100,sumaGanancias()) # RESULTADO DE 1000 VECES 20 JUEGOS
+mean(juegos100>0) # PROBABILIDAD APROXIMADA DE GANANCIA POSITIVA
+```
+
+ b) Sea X la variable aleatoria que representa el número de juegos ganados. 
+
+
+```{r}
+1-pbinom(10,20,18/38)
+#EL RESULTADO ES APROXIMADO PERO SI SE UTILIZAN MÁS CORRIDAS PARA SIMULAR LA PROBABIILIDAD EL RESULTADO ES MÁS APROXIMADO
+mean(replicate(1000,sumaGanancias())>0) # PROB APROXIMADA DE GANACIA POSITIVA CON 1000 VECES 20 JUEGOS
+```
+
+c)
+```{r}
+ganancias <- sample(c(5,-5),20*500,replace=T,prob=c(18/38,20/38)) # VECTOR DE GANANCIAS
+gananciasAcumuladas <- apply(matrix(ganancias,20,500),2,cumsum) #SE CREA UNA MATRIZ CON SUMAS ACUMULADAS
+P <- apply(gananciasAcumuladas>0,2,sum) #SE SUMAN LAS COLUMNAS CON GANANCIAS ACUMULADAS MEYORES A CERO
+hist(P,breaks=20,col=rainbow(20),right=F)
+```
+
+
+
+```{r fig.width=7, fig.height=6}
+#plot(cars)
+```
+
+2.
+a)
+```{r}
+densidadP <- function(x) ifelse(x<=5 & x>=0, x^2*(5-x)*(sin(2*x))^2, 0)
+A <- 7
+X <- as.vector(na.omit(sapply(1:1000,function(x){
+  u <- runif(1,0,5)
+  ifelse(runif(1,0,A) <= densidadP(u),u,NA)
+})))
+
+plot(density(X))
+curve(densidadP(x)/26.22,0,6,add=T,col='green')
+```
+
+3.
+a)
+```{r}
+library(bootstrap)
+pairs(scor)
+cor(scor)
+```
+
+b)
+```{r}
+library(boot)
+
+out <- boot(scor[,1:2],R=500,statistic=corr)
+boot.ci(out,type="all")
+
+getcor <- function(x, ndx) {
+    cor(x[ndx,1], x[ndx,2])
+}
+result <- boot(scor[,1:2], getcor, R=500)
+boot.ci(result, type="all")
+
+
+```
+
+
+4.
+a)
+```{r}
+prob <- 1 - pweibull(4,2,3)
+prob
+```
+
+

@@ -1,3 +1,4 @@
+
 ## Gstat: http://cran.r-project.org/web/packages/gstat/index.html
 ## Clustering de Puntos: http://casoilresource.lawr.ucdavis.edu/drupal/node/340
 ## Ejemplo: http://pages.stern.nyu.edu/~achinco/programming_examples/Example__PlotGeographicDensity.html
@@ -8,10 +9,17 @@ library(ggmap)
 library(plyr)
 library(reshape2)
 
+
+?Sweave
+?cite
+cite("ggmap")
+
 ## Bajar el mapa
 g.map <- get_map(location = c(lon = -99.1393, lat = 19.3772), 
               zoom = 11, maptype = 'roadmap')
 map <- ggmap(g.map)
+
+?get_map
 
 setwd("~/r-workspace/comp-stats/proj")
 
@@ -197,12 +205,8 @@ happy.map
 map.grid.mood <- expand.grid(hour.frame=0:3, weekday=0:6, mood=c(-1, 1))
 map.grid <- expand.grid(hour.frame=0:3, weekday=0:6)
 
-?subset
-?sapply
-
 maps <- list()
 
-?ggtitle
 ddply(map.grid, c("hour.frame", "weekday"), function(p) {
     this.points <- subset(tweets, 
                           hour.frame == p$hour.frame & weekday == p$weekday,
@@ -221,30 +225,6 @@ map + geom_point(data = subset(tweets,
                                select = c("x", "y", "mood")), 
                          aes(x = x, y = y, colour = mood), size = 1)
 
-?geom_point
-maps
 length(all.maps$x)
 nrow(tweets)
 
-perro <- read.csv('/Users/Alfonso/Documents/MCC/Aprendizaje/Proyecto/0_array.csv', header=F)
-m.perro <- as.matrix(perro)
-m.perro[1,]
-nrow(m.perro)
-?image
-image(m.perro)
-image(m.perro[20:nrow(m.perro), 20:(ncol(m.perro))])
-
-
-image(as.matrix(
-    read.csv("~/Documents/MCC/Aprendizaje/Proyecto/trim_dog/10.csv", header=F),
-))
-
-# http://opencvpython.blogspot.mx/2012/06/hi-this-article-is-tutorial-which-try.html
-# http://stackoverflow.com/questions/16538774/dealing-with-contours-and-bounding-rectangle-in-opencv-2-4-python-2-7
-# http://www.mathworks.com/help/matlab/ref/isempty.html
-# http://www.mathworks.com/help/images/ref/imcrop.html
-# http://www.mathworks.com/matlabcentral/fileexchange/23629-exportfig/content/export_fig.m
-# http://stackoverflow.com/questions/2123968/r-array-manipulation
-# http://enumap.wordpress.com/2012/11/23/python-opencv-resize-image/
-# http://stackoverflow.com/questions/10965417/how-to-convert-numpy-array-to-pil-image-applying-matplotlib-colormap
-# 
