@@ -443,7 +443,6 @@ theta <- 28/50
 
 bin.unif <- metropolis(theta,x0,N)
 x.plot <- N*ppoints(N)
-#plot(x.plot,bin.unif$x,type="l",ylab="X",xlab="",main="Theta = 28/50")
 eff <- bin.unif$k/N
 eff
 

@@ -1,0 +1,247 @@
+\documentclass[11pt]{article}
+%\usepackage[centering,margin=30mm]{geometry}
+
+\usepackage[utf8]{inputenc} %para idioma español
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+
+\usepackage{listings}  
+
+\usepackage{graphicx}	%EPS images handler
+\usepackage{amsmath} %para matemáticas
+
+\usepackage{float} %para dejar las imagenes justo en el código
+
+\usepackage{rotating} 
+
+\setlength{\parskip}{.3cm}%espacio entre parrafos
+
+\usepackage{listings}
+
+\title{\textbf{Examen Final: Estadística Computacional}}
+
+\author{Alfonso David Kim Quezada}
+\date{\today}
+\begin{document}
+\maketitle
+
+%% ========================================
+%%    			Pregunta 1
+%% ========================================
+\section{Juego de Ruleta}
+\noindent (20 puntos) Supóngase que se juega a la ruleta repetidamente en un casino. En un juego sencillo, se apuesta $\$5$ al ``rojo''; el jugador gana \$5 con probabilidad de 18/38 y pierde \$5 con probabilidad de 20/38. Si el juego de la ruleta con la misma apuesta es realizado 20 veces, entonces las ganancias individuales pueden ser vistas como una muestra de tamaño 20 con reemplazo a partir del vector $(5,-5) $, donde las probabilidadesrespectivas son $(18/38, 20/38)$.
+
+\noindent a) (5 puntos) Escriba una función para calcular la suma de las ganancias de los 20 juegos en la ruleta. Utilice la función replicate para repetir esta simulación de ``20 juegos'' unas 100 veces. Encuentre la probabilidad aproximada de que la ganancia total es positiva.
+
+\noindent a) \textbf{ La probabilidad de tener ganancias después de 100 juegos es de 0.28 }
+
+\noindent b) (5 puntos) Sea X la variable aleatoria que representa el número de juegos ganados.¿Cuál es la distribución de probabilidad que describe a esta variable? Considerando esa ley de probabilidad, calcule la probabilidad exacta de que la ganancia total es positiva y compare con el resultado obtenido mediante simulación del inciso a).
+
+\noindent b) \textbf{ La probabilidad exacta es 0.3223419 }
+
+\noindent c) (10 puntos) Suponga que le da siguimiento a la ganancia acumulada durante el juego y registra el número de juegos P donde esta ganancia acumulada es positiva. Si las ganancias individuales se almacenan en el vector ganancias, calcule las ganancias acumuladas y el valor de P . Simule este proceso 500 veces y construya la tabla de frecuencias correspondiente a las salidas. Grafíquelas y discuta cuáles valores de P son probables de ocurrir.
+
+\begin{figure} [H]
+	\includegraphics[scale=.6]{img/1c}
+	\caption[]{Tabla de frecuencias}
+\label{fig:fig1}
+\end{figure}
+
+%% ========================================
+%%    			Pregunta 2
+%% ========================================
+\section{Variable Aleatoria A}
+(12 puntos) Sea X variable aleatoria que tiene una función de densidad de probabilidad dada por
+
+\[ f(x) \propto \left\{
+  \begin{array}{l l}
+    x^2(5-x)\sin^2(2x) & \quad 0 \leq x \leq 5\\
+    0 & \quad \text{otro caso}
+  \end{array} \right.\]
+
+Se extraen muestras a partir de X usando el método de aceptación–rechazo como sigue:
+
+\begin{itemize}
+\item Extraer una muestra \( u \sim	U(0,5) \) y \( (U(0,A)) \)
+\item Si \( v \leq u^2(5-u)\sin^2(2u)\)
+\item Se repite el algoritmo anterior hasta obtener la muestra del tamaño deseado.
+\end{itemize}
+
+
+\noindent a) (5 puntos) Determine un valor adecuado para $A$ (nótese que es difícil determinar el valor óptimo –el menor posible– de $A$ para este problema).
+\noindent \textbf{ Con valores muy pequeños de A se ejecutan demasiadas iteraciones, los valores de A que resultaron mejores son los que están entre 1 y 5 }
+
+\noindent b) (5 puntos) Escriba un programa para simular valores a partir de $X$ utilizando el procedimento descrito previamente.
+
+\begin{lstlisting}[language=R]
+aceptar.rechazar <- function(n, A){
+    iters <- 0
+    y <- c()
+    while(length(y) < n) {
+        iters <- iters + 1
+        u <- runif(1, min=0, max=5)
+        v <- runif(1, min=0, max=A)
+        if(u < f.x(v)){
+            y <- c(y, v)
+        }
+    }
+    list(y=y, iters=iters)
+}
+\end{lstlisting}
+
+Podemos observar que los valores más frecuentes son cero y uno.
+
+\noindent c) (2 puntos) Grafique una estimación de la densidad de X. Use plot(density()).
+
+\begin{figure} [H]
+	\includegraphics[scale=.6]{img/2c}
+	\caption[]{Densidad de X}
+\label{fig:fig1}
+\end{figure}
+
+%% ========================================
+%%    			Pregunta 3
+%% ========================================
+\section{Pruebas}
+\noindent (12 puntos) Efron \& Tibshirani discuten los resultados obtenidos de una prueba realizada a 88 estudiantes sobre 5 asignaturas. Las primeras dos pruebas (mechanics y vectors) fueron realizadas a libro cerrado mientras que las últimas 3 pruebas (algebra,analysis y statistics) fueron a libro abierto. Cada renglón de la serie de datos corresponde al conjunto de calificaciones $(xi1 , xi2 , . . . , xi5 )$ para el estudiante iésimo. Basándose en los datos scor(bootstrap) realice lo siguiente:
+
+\noindent a) (3 puntos) En una matriz de gráficas muestre las gráficas de dispersión correspondientes a cada par de calificaciones. Además calcule la matriz de correlacion. Explique sus resultados.
+
+\begin{figure} [H]
+	\includegraphics[scale=.6]{img/3a}
+	\caption[]{Gráficas de Dispersión}
+\label{fig:fig1}
+\end{figure}
+
+\begin{tabular}{ l | c c c c r }
+     &    mec &     vec &     alg  &    ana  &    sta \\ \hline
+mec & 1.0000000 & 0.5534052 & 0.5467511 & 0.4093920 & 0.3890993 \\
+vec & 0.5534052 & 1.0000000 & 0.6096447 & 0.4850813 & 0.4364487 \\
+alg & 0.5467511 & 0.6096447 & 1.0000000 & 0.7108059 & 0.6647357 \\
+ana & 0.4093920 & 0.4850813 & 0.7108059 & 1.0000000 & 0.6071743 \\
+sta & 0.3890993 & 0.4364487 & 0.6647357 & 0.6071743 & 1.0000000 \\
+\end{tabular}
+
+\noindent b) (9 puntos) Considere las siguientes correlaciones:
+
+$$ \hat{\rho}_{12}=\hat{\rho}(mec,vec) $$
+$$ \hat{\rho}_{34}=\hat{\rho}(alg,ana) $$
+$$ \hat{\rho}_{35}=\hat{\rho}(alg,sta) $$
+$$ \hat{\rho}_{45}=\hat{\rho}(ana,sta) $$
+$$ \hat{\rho}_{14}=\hat{\rho}(mec,ana) $$
+
+\noindent Utilice la técnica de bootstrap para obtener los intervalos de confianza (consideres sólo método de la normal estandarizada) para cada uno de los coeficientes decorrelación anteriores y sus errores estándar.
+
+\noindent \textbf{ Para p(mec, vec) rango = (0.405136, 0.703197) y error estandar 0.076037 } \\
+\noindent \textbf{ Para p(alg, ana) rango = (0.609285, 0.807898) y error estandar 0.050667 } \\
+\noindent \textbf{ Para p(alg, sta) rango = (0.546747, 0.785189) y error estandar 0.060828 } \\
+\noindent \textbf{ Para p(ana, sta) rango = (0.466774, 0.746765) y error estandar 0.071428 } \\
+\noindent \textbf{ Para p(mec, ana) rango = (0.195972, 0.627553) y error estandar 0.110099 } \\
+
+%% ========================================
+%%    			Pregunta 4
+%% ========================================
+\section{Weibull}
+\noindent (21 puntos) Sea $X\sim Weibull(2,3)$ una distribución Weibull con parámetro de escala $ \lambda = 2$ y parámetro de forma $k = 3$ dada por 
+
+\[ f_X(x;\lambda,k) = \left\{
+  \begin{array}{l l}
+    \frac{k}{\lambda}(\frac{x}{\lambda})^{k-1} e^{-(\frac{x}{\lambda})^k} & \quad  x \geq 0\\
+    0 & \quad \text{otro caso}
+  \end{array} \right.\]
+
+
+\noindent Realice lo siguiente:
+
+\noindent (a) (4 puntos) Calcule (teóricamente) la función de distribución acumulada (f.d.a),esto es, $F_X (x)$ y encuentre el valor exacto de $P (X > 4)$.
+\noindent \textbf { 0.000335 }
+
+\noindent (b) (7 puntos) Escriba un código para estimar el valor de P (X > 4) basado en una muestra de tamaño 2000 para X distribuida W eibull(2, 3). Compare con el resultado del inciso a).
+
+\begin{lstlisting}[language=R]
+muestra <- rweibull(2000, shape=3, scale=2)
+length(which(muestra > 4)) / 2000
+\end{lstlisting}
+
+\noindent c) (10 puntos) Utilice el método de muestreo por importancia. Escriba un programa que estime $ \theta = P (X > 4)$ a partir de $ Y \sim N(\mu, \sigma^2 ) $. Compare con los resultados de los incisos a) y b).
+
+\begin{lstlisting}[language=R]
+f.x <- function(x){
+    ifelse(x > 4, (2/3) * (x/3) * exp(-(x/3) ^ 2), 0)
+}
+x <- rnorm(10000, mean=2, sd=2)
+f.g <- f.x(x) / dnorm(x, mean=2, sd=2)
+theta.hat <- mean(f.g)
+\end{lstlisting}
+
+%% ========================================
+%%    			Pregunta 5
+%% ========================================
+\section{MCMC}
+\noindent (35 puntos) Considere el ``experimento'' de lanzar una moneda honesta. Sea $\theta$ la probabilidad de que caiga “sol” en un volado, la cual se asume es la misma para todos los volados consecutivos. Además se supone que los volados son estadísticamente independientes, esto es, que el resultado de un lanzamiento no puede predecirse a partir de otros.Así que la probabilidad está determinada por $\theta$ y el número de volados $(\theta \leq \theta \leq 1)$. Sea ahora $X_n$ la variable aleatoria que representa el número ``soles'' en $n$ volados $(n = 1, 2, 3, . . .)$. Entonces la probabilidad de que $X_n$ tome el valor k está dado por:
+
+$$ P(X_n=k | \theta)=f(k|\theta)= \Big(\!
+    \begin{array}{c}
+      n \\
+      k
+    \end{array}
+  \! \Big) \theta (1-\theta)^{n-k}, k=0,1,2,...,n 	$$
+  
+\noindent donde $\Big(\!\begin{array}{c}
+      n \\
+      k
+    \end{array}
+  \! \Big)$ es el coeficiente binomial. La ley de probabilidades anterior se le conoce como k distribución binomial. 
+
+\noindent Considerando este modelo de probabilidad realice lo siguiente:
+
+\noindent a) Una simulación MCMC para obtener la distribución posterior:
+\noindent \textbf{ Se usa el muestreador Metropolis-Hastings, ver código }
+
+Distribución posterior flat
+\begin{figure} [H]
+	\includegraphics[scale=.6]{img/flat_post}
+	\caption[]{Gráficas de Dispersión}
+\label{fig:fig1}
+\end{figure}
+
+Distribución posterior Jeffrey
+\begin{figure} [H]
+	\includegraphics[scale=.6]{img/jeff_post}
+	\caption[]{Gráficas de Dispersión}
+\label{fig:fig1}
+\end{figure}
+
+Se aprecia que las cadenas no convergen correctamente. El periodo de burn-in es de más de 2500
+
+\noindent b) En una gráfica muestre las dis distribuciones prior anteriores
+\begin{figure} [H]
+	\includegraphics[scale=.6]{img/flat}
+	\caption[]{Distribución prior flat}
+\label{fig:fig1}
+\end{figure}
+
+\begin{figure} [H]
+	\includegraphics[scale=.6]{img/jeffrey}
+	\caption[]{Distribución prior Jeffrey}
+\label{fig:fig1}
+\end{figure}
+
+\noindent c) Realice las pruebas de diagnóstico correspondientes de su MCMC
+\noindent \textbf{ Se usa la función Batch Means de Murali }
+
+\begin{lstlisting}[language=R]
+source("http://www.stat.psu.edu/~mharan/batchmeans.R")
+bm(met.flat$x[2501:length(met.flat$x)])
+bm(met.jeff$x[2501:length(met.jeff$x)])
+\end{lstlisting}
+
+Para la prior flat se encontró una media de 0.504 y un error estándar de 0.002 \\
+Para la prior flat se encontró una media de 0.574 y un error estándar de 0.002
+
+\noindent
+\end{document}
+
+
+
+
